@@ -2,3 +2,6 @@
 *.csv
 *.png
 *.pdf
+*.hdf
+*.pt
+*.HDF

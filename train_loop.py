@@ -24,12 +24,12 @@ class TrainLoop(object):
 		self.save_epoch_fmt_generator = os.path.join(self.checkpoint_path, 'checkpoint_{}ep.pt')
 		self.save_epoch_fmt_disc = os.path.join(self.checkpoint_path, 'D{}_checkpoint.pt')
 		self.cuda_mode = cuda
-		self.generator = generator
-		self.f_generator = f_generator
+		self.generator = gen
+		self.f_generator = f_gen
 		self.disc_list = disc_list
 		self.optimizer = optimizer
 		self.train_loader = train_loader
-		self.valid_loader = valid_loader
+		#self.valid_loader = valid_loader
 		self.history = {'hv': [], 'disc': []}
 		self.total_iters = 0
 		self.cur_epoch = 0

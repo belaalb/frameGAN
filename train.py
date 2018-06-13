@@ -28,14 +28,14 @@ parser.add_argument('--average-mode', action='store_true', default=False, help='
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
 
-train_data_set = Loader_manyfiles(hdf5_name=args.targets_data_path)
+train_data_set = Loader(hdf5_name=args.targets_data_path)
 train_loader = DataLoader(train_data_set, batch_size=args.batch_size, shuffle=False, num_workers=args.n_workers)
 
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-generator = models_zoo.generator(args.cuda)
+generator = models_zoo.Generator(args.cuda)
 frames_generator = models_zoo.frames_generator().eval()
 
 gen_state = torch.load(args.generator_path, map_location=lambda storage, loc: storage)

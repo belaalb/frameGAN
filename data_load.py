@@ -23,7 +23,7 @@ class Loader(Dataset):
 
 		scene = torch.from_numpy(self.open_file['data'][index]).float().view([40, 30, 30])
 		idx = np.random.randint(10)
-		img = scene[idx:(idx+31)]
+		img = scene[idx:(idx+30)]
 		img = (img - 0.5) / 0.5
 
 		return img.unsqueeze(0)

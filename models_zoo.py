@@ -38,13 +38,14 @@ class Generator(nn.Module):
 		batch_size = x.size(1)
 		seq_size = x.size(0)
 
-		h0 = Variable(torch.zeros(2, batch_size, 256))
-		c0 = Variable(torch.zeros(2, batch_size, 256))
+		h0 = Variable(torch.zeros(4, batch_size, 256))
+		c0 = Variable(torch.zeros(4, batch_size, 256))
 
 		if self.cuda_mode:
 			h0 = h0.cuda()
 			c0 = c0.cuda()
 
+		
 		x, h_c = self.lstm(x, (h0, c0))
 		
 		x = F.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
@@ -123,18 +124,18 @@ class Discriminator(torch.nn.Module):
 	def __init__(self, optimizer, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
-		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=8, stride=2, padding=3, bias=False), name="weight")
+		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=8, stride=3, padding=2, bias=False), name="weight")
 		self.projection.weight_g.data.fill_(1)
 
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
 		num_filters = [256, 512, 1024]
-		for i in range(3):
+		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
 				conv = nn.Conv3d(1, num_filters[i], kernel_size=4, stride=2, padding=1)
 			else:
-				conv = nn.Conv3d(num_filters[i - 1], num_filters[i], kernel_size=4, stride=1, padding=1)
+				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=1, padding=1)
 
 			conv_name = 'conv' + str(i + 1)
 			self.hidden_layer.add_module(conv_name, conv)
