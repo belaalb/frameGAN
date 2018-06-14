@@ -5,3 +5,5 @@
 *.hdf
 *.pt
 *.HDF
+*.gif
+*.pyc

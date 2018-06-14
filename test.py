@@ -3,7 +3,6 @@ import argparse
 import torch
 from torch.autograd import Variable
 import models_zoo
-from cup_generator.model import Generator
 from data_load import Loader
 from train_loop import TrainLoop
 
@@ -16,7 +15,8 @@ import torchvision.transforms as transforms
 
 def test_model(generator, f_generator, n_tests, cuda_mode, enhancement):
 
-	model.eval()
+	f_generator.eval()
+	generator.eval()
 
 	to_pil = transforms.ToPILImage()
 
@@ -24,11 +24,12 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement):
 
 		z_ = torch.randn(1, 100).view(-1, 100)
 
-		if cuda_mode:
-			sample_in = sample_in.cuda()
-
 		z_ = Variable(z_)
-		out = self.generator.forward(z_)
+
+		if args.cuda:
+			z_ = z_.cuda()
+
+		out = generator.forward(z_)
 
 		frames_list = []
 
@@ -42,7 +43,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement):
 
 def save_gif(data, file_name, enhance):
 
-	data = data.view([40, 30, 30])
+	data = data.view([30, 30, 30]).data.cpu()
 
 	to_pil = transforms.ToPILImage()
 
@@ -69,8 +70,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Testing online transfer learning for emotion recognition tasks')
 	parser.add_argument('--cp-path', type=str, default=None, metavar='Path', help='Checkpoint/model path')
 	parser.add_argument('--generator-path', type=str, default=None, metavar='Path', help='Path for generator params')
-	parser.add_argument('--input-data-path', type=str, default='./data/input/', metavar='Path', help='Path to data input data')
-	parser.add_argument('--targets-data-path', type=str, default='./data/targets/', metavar='Path', help='Path to output data')
 	parser.add_argument('--n-tests', type=int, default=4, metavar='N', help='number of samples to  (default: 64)')
 	parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
 	parser.add_argument('--no-plots', action='store_true', default=False, help='Disables plot of train/test losses')
@@ -90,10 +89,10 @@ if __name__ == '__main__':
 
 	history = ckpt['history']
 
-	generator.load_state_dict(ckpt['model_state'])
+	generator.load_state_dict(ckpt['generator_state'])
 
 	f_gen_state = torch.load(args.generator_path, map_location=lambda storage, loc: storage)
-	frames_generator.load_state_dict(gen_state['model_state'])
+	frames_generator.load_state_dict(f_gen_state['model_state'])
 
 	if args.cuda:
 		generator = generator.cuda()
