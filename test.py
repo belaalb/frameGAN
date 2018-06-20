@@ -5,6 +5,7 @@ from torch.autograd import Variable
 import models_zoo
 from data_load import Loader
 from train_loop import TrainLoop
+import subprocess
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,7 +14,7 @@ from PIL import Image, ImageEnhance
 
 import torchvision.transforms as transforms
 
-def test_model(generator, f_generator, n_tests, cuda_mode, enhancement):
+def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	f_generator.eval()
 	generator.eval()
@@ -39,9 +40,9 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement):
 
 		sample_rec = torch.cat(frames_list, 0)
 
-		save_gif(sample_rec, str(i+1)+'_rec.gif', enhance=enhancement)
+		save_gif(sample_rec, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
 
-def save_gif(data, file_name, enhance):
+def save_gif(data, file_name, enhance, delay):
 
 	data = data.view([30, 30, 30]).data.cpu()
 
@@ -54,6 +55,9 @@ def save_gif(data, file_name, enhance):
 
 	frames[0].save(file_name, save_all=True, append_images=frames[1:])
 
+	#command = 'gifsicle --delay ' + str(delay) + ' ' + file_name + ' > ' + 's' + file_name
+
+	subprocess.call("gifsicle --delay " + str(delay) + " " + file_name + " > " + "s" + file_name, shell = True)
 
 def plot_learningcurves(history, keys):
 
@@ -70,7 +74,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Testing online transfer learning for emotion recognition tasks')
 	parser.add_argument('--cp-path', type=str, default=None, metavar='Path', help='Checkpoint/model path')
 	parser.add_argument('--generator-path', type=str, default=None, metavar='Path', help='Path for generator params')
-	parser.add_argument('--n-tests', type=int, default=4, metavar='N', help='number of samples to  (default: 64)')
+	parser.add_argument('--n-tests', type=int, default=4, metavar='N', help='number of tests  (default: 4)')
+	parser.add_argument('--delay', type=int, default=20, metavar='N', help='Delay between frames  (default: 20)')
 	parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
 	parser.add_argument('--no-plots', action='store_true', default=False, help='Disables plot of train/test losses')
 	parser.add_argument('--enhance', action='store_true', default=True, help='Enables enhancement')
@@ -98,7 +103,7 @@ if __name__ == '__main__':
 		generator = generator.cuda()
 		frames_generator = frames_generator.cuda()
 
-	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance)
+	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
 	if not args.no_plots:
 		plot_learningcurves(history, list(history.keys()))
