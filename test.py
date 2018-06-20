@@ -55,8 +55,6 @@ def save_gif(data, file_name, enhance, delay):
 
 	frames[0].save(file_name, save_all=True, append_images=frames[1:])
 
-	#command = 'gifsicle --delay ' + str(delay) + ' ' + file_name + ' > ' + 's' + file_name
-
 	subprocess.call("gifsicle --delay " + str(delay) + " " + file_name + " > " + "s" + file_name, shell = True)
 
 def plot_learningcurves(history, keys):
