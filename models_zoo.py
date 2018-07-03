@@ -12,29 +12,27 @@ class Generator_conv(nn.Module):
 		## Considering (30, 90) inputs
 
 		self.features = nn.Sequential(
-			nn.ConvTranspose1d(100, 1024, 3, 2, 0, 1, bias = False),
+			nn.ConvTranspose1d(100, 1024, 4, 3, 0, 1, bias = False),
 			nn.BatchNorm1d(1024),
 			nn.ReLU(),
-			nn.ConvTranspose1d(1024, 512, 3, 2, 1, 1, bias = False),
+			nn.ConvTranspose1d(1024, 512, 4, 2, 0, 1, bias = False),
 			nn.BatchNorm1d(512),
 			nn.ReLU(),
-			nn.ConvTranspose1d(512, 256, 2, 2, 1, 1, bias = False),
+			nn.ConvTranspose1d(512, 256, 5, 2, 0, 1, bias = False),
 			nn.BatchNorm1d(256),
 			nn.ReLU(),
-			nn.ConvTranspose1d(256, 30, 2, 1, 1, 2, bias = False),
+			nn.ConvTranspose1d(256, 30, 5, 2, 0, 1, bias = False),
 			nn.BatchNorm1d(30),
 			nn.ReLU() )
 
-		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
+		self.lstm = nn.LSTM(64, 256, 2, bidirectional=True, batch_first=False)
 
 		self.fc = nn.Linear(256*2, 100)
 
 	def forward(self, x):
-
 		x = self.features(x)
-
+		
 		x = x.view(30, x.size(0), -1)
-
 		batch_size = x.size(1)
 		seq_size = x.size(0)
 
