@@ -3,27 +3,77 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable as Variable
 
-class Generator(nn.Module):
+class Generator_conv(nn.Module):
 	def __init__(self, cuda_mode):
-		super(Generator, self).__init__()
+		super(Generator_conv, self).__init__()
 
 		self.cuda_mode = cuda_mode
 
 		## Considering (30, 90) inputs
 
 		self.features = nn.Sequential(
-			nn.ConvTranspose1d(100, 1024, 3, 2, 0, 1),
+			nn.ConvTranspose1d(100, 1024, 3, 2, 0, 1, bias = False),
 			nn.BatchNorm1d(1024),
 			nn.ReLU(),
-			nn.ConvTranspose1d(1024, 512, 3, 2, 1, 1),
+			nn.ConvTranspose1d(1024, 512, 3, 2, 1, 1, bias = False),
 			nn.BatchNorm1d(512),
 			nn.ReLU(),
-			nn.ConvTranspose1d(512, 256, 2, 2, 1, 1),
+			nn.ConvTranspose1d(512, 256, 2, 2, 1, 1, bias = False),
 			nn.BatchNorm1d(256),
 			nn.ReLU(),
-			nn.ConvTranspose1d(256, 30, 2, 1, 1, 2),
+			nn.ConvTranspose1d(256, 30, 2, 1, 1, 2, bias = False),
 			nn.BatchNorm1d(30),
 			nn.ReLU() )
+
+		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
+
+		self.fc = nn.Linear(256*2, 100)
+
+	def forward(self, x):
+
+		x = self.features(x)
+
+		x = x.view(30, x.size(0), -1)
+
+		batch_size = x.size(1)
+		seq_size = x.size(0)
+
+		h0 = Variable(torch.zeros(4, batch_size, 256))
+		c0 = Variable(torch.zeros(4, batch_size, 256))
+
+		if self.cuda_mode:
+			h0 = h0.cuda()
+			c0 = c0.cuda()
+
+		
+		x, h_c = self.lstm(x, (h0, c0))
+		
+		x = F.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
+
+		return x.view(batch_size, seq_size, -1)
+
+
+class Generator_linear(nn.Module):
+	def __init__(self, cuda_mode):
+		super(Generator_linear, self).__init__()
+
+		self.cuda_mode = cuda_mode
+
+		## Considering (30, 90) inputs
+
+		self.features = nn.Sequential(	 		
+					nn.Linear(100, 512, bias = False),
+					nn.BatchNorm1d(512),	
+					nn.ReLU(),	
+					nn.Linear(512, 1024, bias = False),	
+		 			nn.BatchNorm1d(1024),
+		 			nn.ReLU(),	 		
+					nn.Linear(1024, 2048, bias = False),	
+					nn.BatchNorm1d(2048),	
+					nn.ReLU(),
+					nn.Linear(2048, 3840, bias = False),	
+					nn.BatchNorm1d(3840),
+		 			nn.ReLU() )
 
 		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
 
