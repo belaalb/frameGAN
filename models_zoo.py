@@ -12,17 +12,17 @@ class Generator(nn.Module):
 		## Considering (30, 90) inputs
 
 		self.features = nn.Sequential(
-			nn.Linear(100, 512),
-			nn.BatchNorm1d(512),
-			nn.ReLU(),
-			nn.Linear(512, 1024),
+			nn.ConvTranspose1d(100, 1024, 3, 2, 0, 1),
 			nn.BatchNorm1d(1024),
 			nn.ReLU(),
-			nn.Linear(1024, 2048),
-			nn.BatchNorm1d(2048),
+			nn.ConvTranspose1d(1024, 512, 3, 2, 1, 1),
+			nn.BatchNorm1d(512),
 			nn.ReLU(),
-			nn.Linear(2048, 3840),
-			nn.BatchNorm1d(3840),
+			nn.ConvTranspose1d(512, 256, 2, 2, 1, 1),
+			nn.BatchNorm1d(256),
+			nn.ReLU(),
+			nn.ConvTranspose1d(256, 30, 2, 1, 1, 2),
+			nn.BatchNorm1d(30),
 			nn.ReLU() )
 
 		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
