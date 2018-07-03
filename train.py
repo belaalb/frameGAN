@@ -35,7 +35,7 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-generator = models_zoo.Generator(args.cuda)
+generator = models_zoo.Generator_conv(args.cuda)
 frames_generator = models_zoo.frames_generator().eval()
 
 gen_state = torch.load(args.generator_path, map_location=lambda storage, loc: storage)
