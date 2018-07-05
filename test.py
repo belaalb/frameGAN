@@ -23,7 +23,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	for i in range(n_tests):
 
-		z_ = torch.randn(1, 100).view(-1, 100)
+		z_ = torch.randn(1, 100).view(-1, 100, 1)
 
 		z_ = Variable(z_)
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 	if args.cuda:
 		torch.cuda.manual_seed(args.seed)
 
-	generator = models_zoo.Generator_linear(args.cuda)
+	generator = models_zoo.Generator_conv(args.cuda)
 	frames_generator = models_zoo.frames_generator().eval()
 
 	ckpt = torch.load(args.cp_path, map_location = lambda storage, loc: storage)
