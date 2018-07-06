@@ -23,6 +23,7 @@ parser.add_argument('--nadir-slack', type=float, default=1.5, metavar='nadir', h
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 parser.add_argument('--save-every', type=int, default=5, metavar='N', help='how many batches to wait before logging training status. (default: 5)')
 parser.add_argument('--n-workers', type=int, default=4)
+parser.add_argument('--gen-arch', choices=['linear', 'conv'], default='linear', help='Linear or convolutional generator')
 parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
 parser.add_argument('--average-mode', action='store_true', default=False, help='Disables hypervolume maximization and uses average loss instead')
 args = parser.parse_args()
@@ -35,7 +36,11 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-generator = models_zoo.Generator_conv(args.cuda)
+if args.gen_arch == 'conv':
+	generator = models_zoo.Generator_conv(args.cuda)
+elif args.gen_arch == 'linear':
+	generator = models_zoo.Generator_linear(args.cuda)
+
 frames_generator = models_zoo.frames_generator().eval()
 
 gen_state = torch.load(args.generator_path, map_location=lambda storage, loc: storage)

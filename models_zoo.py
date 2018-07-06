@@ -79,7 +79,7 @@ class Generator_linear(nn.Module):
 
 	def forward(self, x):
 
-		x = self.features(x)
+		x = self.features(x.squeeze())
 
 		x = x.view(30, x.size(0), -1)
 
