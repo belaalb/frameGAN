@@ -14,7 +14,7 @@ parser.add_argument('--epochs', type=int, default=200, metavar='N', help='number
 parser.add_argument('--lr', type=float, default=0.0003, metavar='LR', help='learning rate (default: 0.0002)')
 parser.add_argument('--beta1', type=float, default=0.5, metavar='beta1', help='Adam beta 1 (default: 0.5)')
 parser.add_argument('--beta2', type=float, default=0.999, metavar='beta2', help='Adam beta 2 (default: 0.99)')
-parser.add_argument('--targets-data-path', type=str, default='./data/targets/', metavar='Path', help='Path to output data')
+parser.add_argument('--data-path', type=str, default='./data/targets.hdf', metavar='Path', help='Path to output data')
 parser.add_argument('--checkpoint-epoch', type=int, default=None, metavar='N', help='epoch to load for checkpointing. If None, training starts from scratch')
 parser.add_argument('--checkpoint-path', type=str, default=None, metavar='Path', help='Path for checkpointing')
 parser.add_argument('--generator-path', type=str, default=None, metavar='Path', help='Path for frames generator params')
@@ -29,7 +29,7 @@ parser.add_argument('--average-mode', action='store_true', default=False, help='
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
 
-train_data_set = Loader(hdf5_name=args.targets_data_path)
+train_data_set = Loader(hdf5_name=args.data_path)
 train_loader = DataLoader(train_data_set, batch_size=args.batch_size, shuffle=False, num_workers=args.n_workers)
 
 torch.manual_seed(args.seed)

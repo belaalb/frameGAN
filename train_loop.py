@@ -76,7 +76,7 @@ class TrainLoop(object):
 		self.generator.train()
 
 		x = batch
-		z_ = torch.randn(x.size(0), 100).view(-1, 100, 1)
+		z_ = torch.randn(x.size(0), 100).view(-1, 1, 100)
 		y_real_ = torch.ones(x.size(0))
 		y_fake_ = torch.zeros(x.size(0))
 
