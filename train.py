@@ -63,5 +63,6 @@ optimizer_g = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, 
 trainer = TrainLoop(generator, frames_generator, disc_list, optimizer_g, train_loader, nadir_slack=args.nadir_slack, checkpoint_path=args.checkpoint_path, checkpoint_epoch=args.checkpoint_epoch, hyper=not args.average_mode, cuda=args.cuda)
 
 print('Cuda Mode is: {}'.format(args.cuda))
+print('Selected model is: {}'.format(args.gen_arch))
 
 trainer.train(n_epochs=args.epochs, save_every = args.save_every)
