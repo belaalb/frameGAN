@@ -4,7 +4,6 @@ import torch
 from torch.autograd import Variable
 import models_zoo
 from data_load import Loader
-from train_loop import TrainLoop
 import subprocess
 
 import matplotlib.pyplot as plt
@@ -20,6 +19,9 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 	generator.eval()
 
 	to_pil = transforms.ToPILImage()
+
+	n_cols, n_rows = (n_tests, 30)
+	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
 
 	for i in range(n_tests):
 
@@ -39,8 +41,22 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 			frames_list.append(gen_frame.squeeze().unsqueeze(2))
 
 		sample_rec = torch.cat(frames_list, 0)
-
 		save_gif(sample_rec, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
+
+		data = sample_rec.view([30, 30, 30]).cpu().data
+
+		for ax, img in zip(axes[i, :].flatten(), data):
+			ax.axis('off')
+			ax.set_adjustable('box-forced')
+
+			ax.imshow(img, cmap="gray", aspect='equal')
+		
+		plt.subplots_adjust(wspace=0, hspace=0)
+
+	save_fn = 'all.pdf'
+	plt.savefig(save_fn)
+
+	plt.close()
 
 def save_gif(data, file_name, enhance, delay):
 
