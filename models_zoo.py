@@ -177,7 +177,8 @@ class Discriminator(torch.nn.Module):
 
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
-		num_filters = [256, 512, 1024]
+		#num_filters = [256, 512, 1024]
+		num_filters = [128, 256, 512]
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
