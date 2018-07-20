@@ -85,8 +85,6 @@ def plot_real(n_tests, data_path):
 		img_idx = np.random.randint(len(real_loader))
 		real_sample = real_loader[img_idx].squeeze()
 
-		print(real_sample.shape)
-
 		for ax, img in zip(axes[i, :].flatten(), real_sample):
 			ax.axis('off')
 			ax.set_adjustable('box-forced')
@@ -143,6 +141,8 @@ if __name__ == '__main__':
 	if args.cuda:
 		generator = generator.cuda()
 		frames_generator = frames_generator.cuda()
+
+	plot_real(args.n_tests, data_path = './real_data.hdf')
 
 	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
