@@ -73,6 +73,33 @@ def save_gif(data, file_name, enhance, delay):
 
 	subprocess.call("gifsicle --delay " + str(delay) + " " + file_name + " > " + "s" + file_name, shell = True)
 
+def plot_real(n_tests, data_path):
+
+	real_loader = Loader(hdf5_name = data_path)
+
+	n_cols, n_rows = (n_tests, 30)
+	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
+
+	for i in range(n_tests):
+
+		img_idx = np.random.randint(len(real_loader))
+		real_sample = real_loader[img_idx].squeeze()
+
+		print(real_sample.shape)
+
+		for ax, img in zip(axes[i, :].flatten(), real_sample):
+			ax.axis('off')
+			ax.set_adjustable('box-forced')
+
+			ax.imshow(img, cmap="gray", aspect='equal')
+		
+		plt.subplots_adjust(wspace=0, hspace=0)
+
+	save_fn = 'real.pdf'
+	plt.savefig(save_fn)
+
+	plt.close()
+
 def plot_learningcurves(history, keys):
 
 	for i, key in enumerate(keys):
