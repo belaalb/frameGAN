@@ -14,8 +14,8 @@ class Generator(torch.nn.Module):
 		self.linear.add_module('linear', linear)
 
 		# Initializer
-		nn.init.normal(linear.weight, mean=0.0, std=0.02)
-		nn.init.constant(linear.bias, 0.0)
+		nn.init.normal_(linear.weight, mean=0.0, std=0.02)
+		nn.init.constant_(linear.bias, 0.0)
 
 		# Batch normalization
 		bn_name = 'bn0'
@@ -39,8 +39,8 @@ class Generator(torch.nn.Module):
 			self.hidden_layer.add_module(deconv_name, deconv)
 
 			# Initializer
-			nn.init.normal(deconv.weight, mean=0.0, std=0.02)
-			nn.init.constant(deconv.bias, 0.0)
+			nn.init.normal_(deconv.weight, mean=0.0, std=0.02)
+			nn.init.constant_(deconv.bias, 0.0)
 
 			# Batch normalization
 			bn_name = 'bn' + str(i + 1)
@@ -56,8 +56,8 @@ class Generator(torch.nn.Module):
 		out = torch.nn.ConvTranspose2d(256, 1, kernel_size=4, stride=2, padding=2)
 		self.output_layer.add_module('out', out)
 		# Initializer
-		nn.init.normal(out.weight, mean=0.0, std=0.02)
-		nn.init.constant(out.bias, 0.0)
+		nn.init.normal_(out.weight, mean=0.0, std=0.02)
+		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', torch.nn.Tanh())
 
@@ -75,7 +75,8 @@ class Discriminator(torch.nn.Module):
 		super(Discriminator, self).__init__()
 
 		self.projection = nn.utils.weight_norm(nn.Conv2d(1, 1, kernel_size=8, stride=2, padding=3, bias=False), name="weight")
-		self.projection.weight_g.data.fill_(1)
+		#self.projection.weight_g.fill_(1)
+		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
@@ -91,8 +92,8 @@ class Discriminator(torch.nn.Module):
 			self.hidden_layer.add_module(conv_name, conv)
 
 			# Initializer
-			nn.init.normal(conv.weight, mean=0.0, std=0.02)
-			nn.init.constant(conv.bias, 0.0)
+			nn.init.normal_(conv.weight, mean=0.0, std=0.02)
+			nn.init.constant_(conv.bias, 0.0)
 
 			# Batch normalization
 			if i != 0 and batch_norm:
@@ -109,8 +110,8 @@ class Discriminator(torch.nn.Module):
 		out = nn.Conv2d(num_filters[i], 1, kernel_size=4, stride=1, padding=1)
 		self.output_layer.add_module('out', out)
 		# Initializer
-		nn.init.normal(out.weight, mean=0.0, std=0.02)
-		nn.init.constant(out.bias, 0.0)
+		nn.init.normal_(out.weight, mean=0.0, std=0.02)
+		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', nn.Sigmoid())
 

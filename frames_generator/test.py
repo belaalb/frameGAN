@@ -7,7 +7,6 @@ import torch.utils.data
 import numpy as np
 import torch
 import torch.utils.data
-from torch.autograd import Variable
 from torchvision.transforms import transforms
 from model import *
 from PIL import ImageEnhance
@@ -39,12 +38,11 @@ def test_model(model, n_tests, cuda_mode, enhance=True):
 	if cuda_mode:
 		z_ = z_.cuda()
 
-	z_ = Variable(z_)
 	out = model.forward(z_)
 
 	for i in range(out.size(0)):
 		#sample = denorm(out[i].data)
-		sample = out[i].data
+		sample = out[i].detach()
 
 		if len(sample.size())<3:
 			sample = sample.view(1, 28, 28)
@@ -69,7 +67,6 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 	if cuda_mode:
 		noise = noise.cuda()
 
-	noise = Variable(noise, volatile=True)
 	gen_image = generator(noise).view(-1, nc, im_size, im_size)
 	#gen_image = denorm(gen_image)
 	gen_image = gen_image
@@ -82,7 +79,7 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 		ax.axis('off')
 		ax.set_adjustable('box-forced')
 
-		img = img.cpu().data
+		img = img.cpu().detach()
 
 		if enhance:
 			img_E = ImageEnhance.Sharpness( to_pil(img) ).enhance(1.)

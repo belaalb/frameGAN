@@ -1,5 +1,4 @@
 import torch
-from torch.autograd import Variable
 import torch.nn.init as init
 import torch.nn.functional as F
 
@@ -86,11 +85,6 @@ class TrainLoop(object):
 			y_real_ = y_real_.cuda()
 			y_fake_ = y_fake_.cuda()
 
-		x = Variable(x)
-		z_ = Variable(z_)
-		y_real_ = Variable(y_real_)
-		y_fake_ = Variable(y_fake_)
-
 		out = self.generator.forward(z_)
 
 		frames_list = []
@@ -113,7 +107,7 @@ class TrainLoop(object):
 			loss_disc.backward()
 			disc.optimizer.step()
 
-			loss_d += loss_disc.data[0]
+			loss_d += loss_disc.item()
 
 		loss_d /= len(self.disc_list)
 
@@ -128,7 +122,7 @@ class TrainLoop(object):
 
 			for disc in self.disc_list:
 				losses_list_var.append(F.binary_cross_entropy(disc.forward(out).squeeze(), y_real_))
-				losses_list_float.append(losses_list_var[-1].data[0])
+				losses_list_float.append(losses_list_var[-1].item())
 
 			self.update_nadir_point(losses_list_float)
 
@@ -145,7 +139,7 @@ class TrainLoop(object):
 		loss_G.backward()
 		self.optimizer.step()
 
-		return loss_G.data[0], loss_d
+		return loss_G.item(), loss_d
 
 	def checkpointing(self):
 
@@ -191,11 +185,11 @@ class TrainLoop(object):
 	def print_params_norms(self):
 		norm = 0.0
 		for params in list(self.generator.parameters()):
-			norm+=params.norm(2).data[0]
+			norm+=params.norm(2).item()
 		print('Sum of weights norms: {}'.format(norm))
 
 	def print_grad_norms(self):
 		norm = 0.0
 		for params in list(self.generator.parameters()):
-			norm+=params.grad.norm(2).data[0]
+			norm+=params.grad.norm(2).item()
 		print('Sum of grads norms: {}'.format(norm))

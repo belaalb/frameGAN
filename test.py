@@ -1,7 +1,6 @@
 from __future__ import print_function
 import argparse
 import torch
-from torch.autograd import Variable
 import models_zoo
 from data_load import Loader
 import subprocess
@@ -27,8 +26,6 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 		z_ = torch.randn(1, 100).view(-1, 100, 1)
 
-		z_ = Variable(z_)
-
 		if args.cuda:
 			z_ = z_.cuda()
 
@@ -43,7 +40,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 		sample_rec = torch.cat(frames_list, 0)
 		save_gif(sample_rec, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
 
-		data = sample_rec.view([30, 30, 30]).cpu().data
+		data = sample_rec.view([30, 30, 30]).cpu().detach()
 
 		for ax, img in zip(axes[i, :].flatten(), data):
 			ax.axis('off')
@@ -60,7 +57,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 def save_gif(data, file_name, enhance, delay):
 
-	data = data.view([30, 30, 30]).data.cpu()
+	data = data.view([30, 30, 30]).detach().cpu()
 
 	to_pil = transforms.ToPILImage()
 

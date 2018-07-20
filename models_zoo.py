@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable as Variable
+
 
 class Generator_conv(nn.Module):
 	def __init__(self, cuda_mode):
@@ -36,8 +36,8 @@ class Generator_conv(nn.Module):
 		batch_size = x.size(1)
 		seq_size = x.size(0)
 
-		h0 = Variable(torch.zeros(4, batch_size, 256))
-		c0 = Variable(torch.zeros(4, batch_size, 256))
+		h0 = torch.zeros(4, batch_size, 256)
+		c0 = torch.zeros(4, batch_size, 256)
 
 		if self.cuda_mode:
 			h0 = h0.cuda()
@@ -86,8 +86,8 @@ class Generator_linear(nn.Module):
 		batch_size = x.size(1)
 		seq_size = x.size(0)
 
-		h0 = Variable(torch.zeros(4, batch_size, 256))
-		c0 = Variable(torch.zeros(4, batch_size, 256))
+		h0 = torch.zeros(4, batch_size, 256)
+		c0 = torch.zeros(4, batch_size, 256)
 
 		if self.cuda_mode:
 			h0 = h0.cuda()
@@ -112,8 +112,8 @@ class frames_generator(torch.nn.Module):
 		self.linear.add_module('linear', linear)
 
 		# Initializer
-		nn.init.normal(linear.weight, mean=0.0, std=0.02)
-		nn.init.constant(linear.bias, 0.0)
+		nn.init.normal_(linear.weight, mean=0.0, std=0.02)
+		nn.init.constant_(linear.bias, 0.0)
 
 		# Batch normalization
 		bn_name = 'bn0'
@@ -137,8 +137,8 @@ class frames_generator(torch.nn.Module):
 			self.hidden_layer.add_module(deconv_name, deconv)
 
 			# Initializer
-			nn.init.normal(deconv.weight, mean=0.0, std=0.02)
-			nn.init.constant(deconv.bias, 0.0)
+			nn.init.normal_(deconv.weight, mean=0.0, std=0.02)
+			nn.init.constant_(deconv.bias, 0.0)
 
 			# Batch normalization
 			bn_name = 'bn' + str(i + 1)
@@ -154,8 +154,8 @@ class frames_generator(torch.nn.Module):
 		out = torch.nn.ConvTranspose2d(256, 1, kernel_size=4, stride=2, padding=2)
 		self.output_layer.add_module('out', out)
 		# Initializer
-		nn.init.normal(out.weight, mean=0.0, std=0.02)
-		nn.init.constant(out.bias, 0.0)
+		nn.init.normal_(out.weight, mean=0.0, std=0.02)
+		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', torch.nn.Tanh())
 
@@ -173,11 +173,12 @@ class Discriminator(torch.nn.Module):
 		super(Discriminator, self).__init__()
 
 		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=8, stride=3, padding=2, bias=False), name="weight")
-		self.projection.weight_g.data.fill_(1)
+		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
-		num_filters = [256, 512, 1024]
+		#num_filters = [256, 512, 1024]
+		num_filters = [128, 256, 512]
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
@@ -189,8 +190,8 @@ class Discriminator(torch.nn.Module):
 			self.hidden_layer.add_module(conv_name, conv)
 
 			# Initializer
-			nn.init.normal(conv.weight, mean=0.0, std=0.02)
-			nn.init.constant(conv.bias, 0.0)
+			nn.init.normal_(conv.weight, mean=0.0, std=0.02)
+			nn.init.constant_(conv.bias, 0.0)
 
 			# Batch normalization
 			if i != 0 and batch_norm:
@@ -207,8 +208,8 @@ class Discriminator(torch.nn.Module):
 		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=1, padding=1)
 		self.output_layer.add_module('out', out)
 		# Initializer
-		nn.init.normal(out.weight, mean=0.0, std=0.02)
-		nn.init.constant(out.bias, 0.0)
+		nn.init.normal_(out.weight, mean=0.0, std=0.02)
+		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', nn.Sigmoid())
 
