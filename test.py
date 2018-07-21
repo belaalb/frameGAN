@@ -109,6 +109,7 @@ if __name__ == '__main__':
 	# Testing settings
 	parser = argparse.ArgumentParser(description='Testing online transfer learning for emotion recognition tasks')
 	parser.add_argument('--cp-path', type=str, default=None, metavar='Path', help='Checkpoint/model path')
+	parser.add_argument('--gen-arch', choices=['linear', 'conv'], default='linear', help='Linear or convolutional generator')
 	parser.add_argument('--generator-path', type=str, default=None, metavar='Path', help='Path for generator params')
 	parser.add_argument('--n-tests', type=int, default=4, metavar='N', help='number of tests  (default: 4)')
 	parser.add_argument('--delay', type=int, default=20, metavar='N', help='Delay between frames  (default: 20)')
@@ -123,7 +124,11 @@ if __name__ == '__main__':
 	if args.cuda:
 		torch.cuda.manual_seed(args.seed)
 
-	generator = models_zoo.Generator_conv(args.cuda)
+	if args.gen_arch == 'conv':
+		generator = models_zoo.Generator_conv(args.cuda)
+	elif args.gen_arch == 'linear':
+		generator = models_zoo.Generator_linear(args.cuda)
+
 	frames_generator = models_zoo.frames_generator().eval()
 
 	ckpt = torch.load(args.cp_path, map_location = lambda storage, loc: storage)
@@ -138,8 +143,6 @@ if __name__ == '__main__':
 	if args.cuda:
 		generator = generator.cuda()
 		frames_generator = frames_generator.cuda()
-
-	plot_real(args.n_tests, data_path = './real_data.hdf')
 
 	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
