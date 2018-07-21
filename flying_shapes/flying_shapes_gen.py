@@ -21,62 +21,52 @@ import cv2
 import numpy as np
 from third_party import dataset
 
+from tqdm import trange
+#################
+# CONFIG
+#################
+n_samples = 1000#2 # num of samples
+num_frames = 30 # num of frames per sample (The image size is changed inside dataset.py)
+batch_size = 5 # default of original file
+config = locals() #dict(locals(), **FLAGS) #update locals with any flags passed by cmdln
+
 
 def data_gen():
   
-  #################
-  # CONFIG
-  #################
-
-  experiment_path = 'rapela'#None
-  n_samples = 2 # num of samples
-  num_frames = 30 # num of frames per sample (The image size is changed inside dataset.py)
-  batch_size = 5 # default of original file
-  config = locals() #dict(locals(), **FLAGS) #update locals with any flags passed by cmdln
-
-  i = 0
-  while os.path.exists(experiment_path + "_" + str(i)):
-    i += 1
-  experiment_path = experiment_path + "_" + str(i)
-  os.mkdir(experiment_path)
-  config['experiment_path'] = experiment_path
-  print('Saving to ' + str(experiment_path))
-
-  # write config file
-  #with open(os.path.join(experiment_path, 'exp_config.txt'), 'w') as f:
-  #  for key in sorted(config):
-  #    f.write(key + '\t' + str(config[key]) + '\n')
 
   data_source = dataset.FlyingShapesDataHandler(batch_size=batch_size,seq_len=num_frames)
   
-  for n in range(n_samples):
+  dat = []
+  for n in trange(0,n_samples):#range(n_samples):
+    
     np_batch = data_source.GetUnlabelledBatch()
     batch = {
     'image': np_batch['image'],
     'bbox': np_batch['bbox']
     }
-    print ('Sample ' + str(n+1) )
+    #print ('Sample ' + str(n+1) )
+    sample = []
     for i in range(num_frames):
-      print(batch['image'][0][i].shape)
-      cv2.imshow("teste",batch['image'][0][i])
-      cv2.waitKey(0)
-  exit(0)
+      #print(batch['image'][0][i].shape)
+      #cv2.imshow("teste",batch['image'][0][i])
+      #cv2.waitKey(0)
 
-
-        
-#import argparse
-#import pickle
-#import h5py
-#import numpy as np
-#
-#import matplotlib
-#matplotlib.use('Agg')
-#import matplotlib.pyplot as plt
-#
+      #sample.append(batch['image'][0][i])
+      sample.append(batch['image'][0][i])
+    #print("sample: ", len(sample))
+    #print(np.asarray(sample).shape)
+    
+    dat.append(np.moveaxis(sample, 0, -1))
+  dat = np.rollaxis(np.asarray(dat), 4, 3)
+  return dat
 
 if __name__ == '__main__':
   
-
+  import argparse
+  import pickle
+  import h5py
+  import numpy as np
+  
   # Data settings
   #parser = argparse.ArgumentParser(description='Generate Bouncing balls dataset')
   #parser.add_argument('--im-size', type=int, default=32, metavar='N', help='H and W of frames (default: 32)')
@@ -88,13 +78,12 @@ if __name__ == '__main__':
   #args = parser.parse_args()
 
   dat = data_gen()
-
-  for i in range(args.n_samples):
-    sample=bounce_mat(res=args.im_size, n=args.n_balls, T=args.n_frames)
-    dat.append( np.moveaxis(sample[i], 0, -1) )
-    print(dat[i].shape)
-    print(i)
-
-  hdf5 = h5py.File(args.output_path+args.file_name, 'w')
+  print(dat.shape)
+  #for i in range(n_samples):
+  #  print(np.asarray(dat[i]).shape)
+  #  print(len(dat))
+  #  print(i)
+  
+  hdf5 = h5py.File('teste.hdf', 'w')
   dataset = hdf5.create_dataset('data', data=np.asarray(dat))
   hdf5.close()
