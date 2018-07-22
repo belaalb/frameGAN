@@ -1,6 +1,16 @@
 
 
 
+conda install numpy
+
+conda install matplotlib
+
+conda install tqdm
+
+conda install h5py
+
+conda install -c menpo opencv3
+
 
 
 How to run

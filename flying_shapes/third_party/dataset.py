@@ -18,7 +18,9 @@
 #from __future__ import division
 #from __future__ import print_function
 
-import cPickle as pickle
+
+import _pickle as pickle
+#import cPickle as pickle
 import os
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
@@ -56,12 +58,13 @@ class FlyingShapesDataHandler(object):
       self.seq_length_ = seq_len
 
     try:
-      dataset = pickle.load(open(self.file_path_))
+      dataset = pickle.load(open(self.file_path_, "rb"),  encoding='bytes')
     except Exception as e:
       raise e
 
-    self.data_ = np.float32(dataset['images']).transpose(0, 3, 1, 2) / 255.
-    self.labels_ = dataset['labels']
+    print(dataset)
+    self.data_ = np.float32(dataset[b'images']).transpose(0, 3, 1, 2) / 255.
+    self.labels_ = dataset[b'labels']
     self.indices_ = np.arange(self.data_.shape[0])
     self.row_ = 0
     np.random.shuffle(self.indices_)
@@ -91,13 +94,13 @@ class FlyingShapesDataHandler(object):
 
     start_y = np.zeros((length, batch_size))
     start_x = np.zeros((length, batch_size))
-    for i in xrange(length):
+    for i in range(length):
       # Take a step along velocity.
       y += v_y * self.step_length_
       x += v_x * self.step_length_
 
       # Bounce off edges.
-      for j in xrange(batch_size):
+      for j in range(batch_size):
         if x[j] <= 0:
           x[j] = 0
           v_x[j] = -v_x[j]
@@ -145,8 +148,8 @@ class FlyingShapesDataHandler(object):
     bboxes = np.zeros((self.batch_size_, self.seq_length_, 4))
     labels = np.zeros((self.batch_size_, self.seq_length_, labels_size))
 
-    for j in xrange(self.batch_size_):
-      for n in xrange(self.num_digits_):
+    for j in range(self.batch_size_):
+      for n in range(self.num_digits_):
 
         # get random digit from dataset
         ind = self.indices_[self.row_]
@@ -168,7 +171,7 @@ class FlyingShapesDataHandler(object):
           label = ind
 
         # generate video
-        for i in xrange(self.seq_length_):
+        for i in range(self.seq_length_):
           top = start_y[i, j * self.num_digits_ + n]
           left = start_x[i, j * self.num_digits_ + n]
           bottom = top  + self.digit_size_
@@ -194,8 +197,8 @@ class FlyingShapesDataHandler(object):
                      3, self.image_size_, self.image_size_), dtype=np.float32)
     bboxes = np.zeros((self.batch_size_, self.seq_length_, 4), dtype=np.float32)
 
-    for j in xrange(self.batch_size_):
-      for n in xrange(self.num_digits_):
+    for j in range(self.batch_size_):
+      for n in range(self.num_digits_):
 
         # get random digit from dataset
         ind = self.indices_[self.row_]
@@ -206,7 +209,7 @@ class FlyingShapesDataHandler(object):
         digit_image = self.data_[ind, :, :, :]
 
         # generate video
-        for i in xrange(self.seq_length_):
+        for i in range(self.seq_length_):
           top = start_y[i, j * self.num_digits_ + n]
           left = start_x[i, j * self.num_digits_ + n]
           bottom = top  + self.digit_size_
@@ -242,7 +245,7 @@ class FlyingShapesDataHandler(object):
     num_rows = 1
     plt.figure(2*fig, figsize=(20, 1))
     plt.clf()
-    for i in xrange(self.seq_length_):
+    for i in range(self.seq_length_):
       figgy = plt.subplot(num_rows, self.seq_length_, i+1)
       figgy.add_patch(patches.Rectangle((bboxes[i][1], bboxes[i][0]),
                                         (bboxes[i][3] - bboxes[i][1]),
