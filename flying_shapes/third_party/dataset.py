@@ -14,9 +14,9 @@
 
 """An infinite dataset of flying shapes bouncing around on a black background.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+#from __future__ import absolute_import
+#from __future__ import division
+#from __future__ import print_function
 
 import cPickle as pickle
 import os
@@ -29,12 +29,11 @@ class FlyingShapesDataHandler(object):
   """Data Handler that creates the Flying Shapes dataset on the fly."""
 
   def __init__(self, config=None, file_path=None, batch_size=None,
-               seq_len=None):
-
+               seq_len=None,im_size=30):
     if config is None:
       self.seq_length_ = 10
       self.batch_size_ = 7
-      self.image_size_ = 30
+      self.image_size_ = im_size
       self.num_digits_ = 3
       self.step_length_ = 0.5  # 1/initial_speed (i_s*cos(angle) = velocity)
       self.digit_size_ = 16
@@ -57,7 +56,6 @@ class FlyingShapesDataHandler(object):
       self.seq_length_ = seq_len
 
     try:
-      print (self.file_path_)
       dataset = pickle.load(open(self.file_path_))
     except Exception as e:
       raise e
