@@ -151,7 +151,7 @@ class frames_generator(torch.nn.Module):
 		# Output layer
 		self.output_layer = torch.nn.Sequential()
 		# Deconvolutional layer
-		out = torch.nn.ConvTranspose2d(256, 1, kernel_size=4, stride=2, padding=2)
+		out = torch.nn.ConvTranspose2d(256, 3, kernel_size=4, stride=2, padding=2)
 		self.output_layer.add_module('out', out)
 		# Initializer
 		nn.init.normal_(out.weight, mean=0.0, std=0.02)
@@ -172,7 +172,7 @@ class Discriminator(torch.nn.Module):
 	def __init__(self, optimizer, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
-		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=8, stride=3, padding=2, bias=False), name="weight")
+		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 1, kernel_size=(8, 8, 1), stride=(3, 3, 1), padding=(2, 2, 0), bias=False), name="weight")
 		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
@@ -182,9 +182,11 @@ class Discriminator(torch.nn.Module):
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
-				conv = nn.Conv3d(1, num_filters[i], kernel_size=4, stride=2, padding=1)
+				conv = nn.Conv3d(1, num_filters[i], kernel_size=4, stride=(2,2,2), padding=(1,1,1))
+			elif i ==1:
+				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(1,1,2), padding=(1,1,1))
 			else:
-				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=1, padding=1)
+				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(1,1,1), padding=(1,1,0))
 
 			conv_name = 'conv' + str(i + 1)
 			self.hidden_layer.add_module(conv_name, conv)
@@ -205,7 +207,7 @@ class Discriminator(torch.nn.Module):
 		# Output layer
 		self.output_layer = torch.nn.Sequential()
 		# Convolutional layer
-		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=1, padding=1)
+		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=(1,1,1), padding=(1,1,0))
 		self.output_layer.add_module('out', out)
 		# Initializer
 		nn.init.normal_(out.weight, mean=0.0, std=0.02)
