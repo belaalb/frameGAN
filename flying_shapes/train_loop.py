@@ -139,7 +139,7 @@ class TrainLoop(object):
 		loss_G.backward()
 		self.optimizer.step()
 
-		return loss_G.item(), loss_d
+		return loss_G.item()/len(self.disc_list), loss_d
 
 	def checkpointing(self):
 
