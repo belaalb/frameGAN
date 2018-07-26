@@ -73,7 +73,9 @@ if __name__ == '__main__':
 
 	dat = np.asarray(dat)
 
-	dat = ( dat - dat.mean((0,1,2,3,4)) ) / (dat.std((0,1,2,3,4)) + 1e-7)
+	dat = ( dat - dat.mean((0,1,2,3)) ) / (dat.std((0,1,2,3)) + 1e-7)
+
+	print(dat.mean((0,1,2,3)) , dat.std((0,1,2,3)))
 
 	## DEBUG ##
 	if(args.debug):
