@@ -1,4 +1,5 @@
 
+
 # Flying Shape Dataset Gen
 
 Hello there, with [flying_shapes_gen.py](https://github.com/belaalb/frameGAN/blob/master/flying_shapes/flying_shapes_gen.py "flying_shapes_gen.py"), you can create your flying shape dataset to use in your project.
@@ -38,11 +39,17 @@ If you don't want to see samples generator, you don't need to install (you can s
 ### Parameters
 
 --im-size: Height and Width of frames (default: 30)
+
 --n-frames: Number of frames per sample (default: 128)
+
 --n-samples: Number of output samples (default: 500)
+
 --output-path: Path for output
+
 --file-name: Output file name
+
 --debug: Debug Flag 	1/0
+
 --opencv:  Debug Opencv Flag 1/0
 
 * Debug flag is used to print in console the dataset and samples tensors
