@@ -12,7 +12,7 @@ class Loader(Dataset):
 		self.hdf5_name = hdf5_name
 
 		open_file = h5py.File(self.hdf5_name, 'r')
-		self.length = len(open_file['data'])
+		self.length = len(open_file['./train.hdf'])
 		open_file.close()
 
 		self.open_file = None
@@ -21,12 +21,16 @@ class Loader(Dataset):
 
 		if not self.open_file: self.open_file = h5py.File(self.hdf5_name, 'r')
 
-		scene = torch.from_numpy(np.moveaxis(self.open_file['data'][index], -1, 0)).float()
-		idx = np.random.randint(scene.size(0)-30)
-		img = scene[idx:(idx+30)]
+		scene_1 = self.open_file['./train.hdf'][index]
+		scene_2 = np.moveaxis(scene_1, -1, 0)
+		scene_3 = np.moveaxis(scene_2, -1, 1)
+		scene_4 = torch.from_numpy(scene_3).float()
+
+		idx = np.random.randint(scene_4.size(1)-30)
+		img = scene_4[:, idx:(idx+30), :, :]
 		img = (img - 0.5) / 0.5
 
-		return img.unsqueeze(0)
+		return img
 
 	def __len__(self):
 		return self.length

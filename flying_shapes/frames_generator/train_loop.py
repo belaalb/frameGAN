@@ -10,7 +10,6 @@ from tqdm import tqdm
 
 from MGD_utils import *
 
-
 class TrainLoop(object):
 
 	def __init__(self, generator, disc_list, optimizer, train_loader, alpha=0.8, nadir_slack=1.1, train_mode='vanilla', checkpoint_path=None, checkpoint_epoch=None, cuda=True, job_id=None):

@@ -172,7 +172,7 @@ class Discriminator(torch.nn.Module):
 	def __init__(self, optimizer, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
-		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=(1, 8, 8), stride=(1, 3, 3), padding=(0, 2, 2), bias=False), name="weight")
+		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 1, kernel_size=(1, 8, 8), stride=(1, 3, 3), padding=(0, 2, 2), bias=False), name="weight")
 		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
