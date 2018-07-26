@@ -28,7 +28,6 @@ class TrainLoop(object):
 		self.disc_list = disc_list
 		self.optimizer = optimizer
 		self.train_loader = train_loader
-		#self.valid_loader = valid_loader
 		self.history = {'hv': [], 'disc': []}
 		self.total_iters = 0
 		self.cur_epoch = 0
@@ -133,13 +132,13 @@ class TrainLoop(object):
 
 			for disc in self.disc_list:
 				loss_G += F.binary_cross_entropy(disc.forward(out).squeeze(), y_real_)
-			self.proba = np.ones(len(self.disc_list)) * 1 / len(self.disc_list)
+
 
 		self.optimizer.zero_grad()
 		loss_G.backward()
 		self.optimizer.step()
 
-		return loss_G.item(), loss_d
+		return loss_G.item()/len(self.disc_list), loss_d
 
 	def checkpointing(self):
 
