@@ -46,7 +46,7 @@ class Generator_conv(nn.Module):
 		
 		x, h_c = self.lstm(x, (h0, c0))
 		
-		x = F.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
+		x = torch.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
 
 		return x.view(batch_size, seq_size, -1)
 
@@ -96,7 +96,7 @@ class Generator_linear(nn.Module):
 		
 		x, h_c = self.lstm(x, (h0, c0))
 		
-		x = F.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
+		x = torch.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
 
 		return x.view(batch_size, seq_size, -1)
 
@@ -178,7 +178,7 @@ class Discriminator(torch.nn.Module):
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
 		#num_filters = [256, 512, 1024]
-		num_filters = [128, 256, 512]
+		num_filters = [256, 512, 768]
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
