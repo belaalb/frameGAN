@@ -12,7 +12,7 @@ class Loader(Dataset):
 		self.hdf5_name = hdf5_name
 
 		open_file = h5py.File(self.hdf5_name, 'r')
-		self.length = len(open_file['./train.hdf'])
+		self.length = len(open_file['data'])
 		open_file.close()
 
 		self.open_file = None
@@ -21,7 +21,7 @@ class Loader(Dataset):
 
 		if not self.open_file: self.open_file = h5py.File(self.hdf5_name, 'r')
 
-		scene_1 = self.open_file['./train.hdf'][index]
+		scene_1 = self.open_file['data'][index]
 		scene_2 = np.moveaxis(scene_1, -1, 0)
 		scene_3 = np.moveaxis(scene_2, -1, 1)
 		scene_4 = torch.from_numpy(scene_3).float()

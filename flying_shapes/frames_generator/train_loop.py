@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from scipy.optimize import minimize
 from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+
 from MGD_utils import *
 
 class TrainLoop(object):
@@ -85,6 +87,10 @@ class TrainLoop(object):
 		z_ = torch.randn(x.size(0), 100).view(-1, 100, 1, 1)
 		y_real_ = torch.ones(x.size(0))
 		y_fake_ = torch.zeros(x.size(0))
+
+		plt.figure()
+		plt.imshow(im)
+		plt.show()
 
 		if self.cuda_mode:
 			x = x.cuda()

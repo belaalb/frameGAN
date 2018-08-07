@@ -102,7 +102,7 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 
 	if not os.path.exists(save_dir):
 		os.mkdir(save_dir)
-	save_fn = save_dir + prefix + '_' + cp_name + '.pdf'
+	save_fn = save_dir + prefix + '_' + cp_name + '.png'
 	plt.savefig(save_fn)
 
 	plt.close()
@@ -136,5 +136,5 @@ if __name__ == '__main__':
 	if not args.no_plots:
 		plot_learningcurves(history, list(history.keys()))
 
-	test_model(model=model, n_tests=args.n_tests, cuda_mode=args.cuda)
-	save_samples(generator=model, cp_name=args.cp_path.split('/')[-1].split('.')[0], prefix='mnist', fig_size=(30, 30), nc=1, im_size=30, cuda_mode=args.cuda, enhance=False)
+	test_model(model=model, n_tests=args.n_tests, cuda_mode=args.cuda, enhance=False)
+	save_samples(generator=model, cp_name=args.cp_path.split('/')[-1].split('.')[0], prefix='mnist', fig_size=(9, 9), nc=3, im_size=30, cuda_mode=args.cuda, enhance=False)
