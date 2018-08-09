@@ -88,10 +88,6 @@ class TrainLoop(object):
 		y_real_ = torch.ones(x.size(0))
 		y_fake_ = torch.zeros(x.size(0))
 
-		plt.figure()
-		plt.imshow(im)
-		plt.show()
-
 		if self.cuda_mode:
 			x = x.cuda()
 			z_ = z_.cuda()

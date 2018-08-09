@@ -29,7 +29,8 @@ parser.add_argument('--data-path', type=str, default='../data/targets/output_tra
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 parser.add_argument('--save-every', type=int, default=5, metavar='N', help='how many epochs to wait before logging training status. Default is 5')
-parser.add_argument('--train-mode', choices=['vanilla', 'hyper', 'gman', 'gman_grad', 'loss_delta', 'mgd'], default='vanilla', help='Salect train mode. Default is vanilla (simple average of Ds losses)')
+parser.add_argument('--train-mode', choices=['vanilla', 'hyper', 'gman', 'gman_grad', 'loss_delta', 'mgd'], default='vanilla', help='Select train mode. Default is vanilla (simple average of Ds losses)')
+parser.add_argument('--optimizer', choices=['adam', 'amsgrad', 'rmsprop'], default='adam', help='Select optimizer (Default is adam).')
 parser.add_argument('--nadir-slack', type=float, default=1.5, metavar='nadir', help='factor for nadir-point update. Only used in hyper mode (default: 1.5)')
 parser.add_argument('--alpha', type=float, default=0.8, metavar='alhpa', help='Used in GMAN and loss_del modes (default: 0.8)')
 parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
@@ -49,7 +50,14 @@ generator = Generator().train()
 
 disc_list = []
 for i in range(args.ndiscriminators):
-	disc = Discriminator(optim.Adam, args.lr, (args.beta1, args.beta2)).train()
+
+	if args.optimizer == 'adam':
+		disc = Discriminator(optim.Adam, args.optimizer, args.lr, (args.beta1, args.beta2)).train()
+	elif args.optimizer == 'amsgrad':	
+		disc = Discriminator(optim.Adam, args.optimizer, args.lr, (args.beta1, args.beta2), amsgrad = True).train()
+	elif args.optimizer == 'rmsprop':
+		disc = Discriminator(optim.RMSprop, args.optimizer, args.lr, (args.beta1, args.beta2)).train()
+
 	disc_list.append(disc)
 
 if args.cuda:
@@ -60,8 +68,13 @@ if args.cuda:
 
 if args.train_mode == 'mgd' and args.sgd:
 	optimizer = optim.SGD(generator.parameters(), lr=args.mgd_lr)
-else:
+elif args.optimizer == 'adam':
 	optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, args.beta2))
+elif args.optimizer == 'amsgrad':
+	optimizer = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), amsgrad = True)
+elif args.optimizer == 'rmsprop':
+	optimizer = optim.RMSprop(generator.parameters(), lr=args.lr)
+
 
 trainer = TrainLoop(generator, disc_list, optimizer, train_loader, nadir_slack=args.nadir_slack, alpha=args.alpha, train_mode=args.train_mode, checkpoint_path=args.checkpoint_path, checkpoint_epoch=args.checkpoint_epoch, cuda=args.cuda, job_id=args.job_id)
 
