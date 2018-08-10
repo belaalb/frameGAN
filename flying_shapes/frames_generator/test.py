@@ -68,7 +68,7 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 		noise = noise.cuda()
 
 	gen_image = generator(noise).view(-1, nc, im_size, im_size)
-	#gen_image = denorm(gen_image)
+	gen_image = denorm(gen_image)
 	gen_image = gen_image
 
 	#n_rows = np.sqrt(noise.size()[0]).astype(np.int32)

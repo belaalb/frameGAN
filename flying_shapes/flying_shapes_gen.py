@@ -73,6 +73,8 @@ if __name__ == '__main__':
 
 	dat = np.asarray(dat)
 
+	print(dat.max((0,1,2,3)) , dat.min((0,1,2,3)))
+
 	#dat = ( dat - dat.mean((0,1,2,3)) ) / (dat.std((0,1,2,3)) + 1e-7)
 	dat = ( 2*dat - dat.max((0,1,2,3)) - dat.min((0,1,2,3)) ) / (dat.max((0,1,2,3)) - dat.min((0,1,2,3)) + 1e-7)
 
