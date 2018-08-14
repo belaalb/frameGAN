@@ -72,7 +72,7 @@ class Generator(torch.nn.Module):
 		return out
 
 class Discriminator(torch.nn.Module):
-	def __init__(self, optimizer, optimizer_name, lr, betas, amsgrad = False, batch_norm=False):
+	def __init__(self, optimizer, optimizer_name, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
 		self.projection = nn.utils.weight_norm(nn.Conv2d(3, 1, kernel_size=8, stride=2, padding=3, bias=False), name="weight")
@@ -115,7 +115,6 @@ class Discriminator(torch.nn.Module):
 		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', nn.Sigmoid())
-
 
 		if optimizer_name == 'adam':
 			self.optimizer = optimizer(list(self.hidden_layer.parameters()) + list(self.output_layer.parameters()), lr=lr, betas=betas)
