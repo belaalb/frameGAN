@@ -34,19 +34,26 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 		frames_list = []
 
 		for j in range(out.size(1)):
-			gen_frame = f_generator(out[:,j,:].squeeze(1).contiguous())
-			frames_list.append(gen_frame.squeeze().unsqueeze(2))
+			gen_frame = f_generator(out[:,j,:].contiguous())
+			frames_list.append(gen_frame.detach())
 
-		sample_rec = torch.cat(frames_list, 0)
-		save_gif(sample_rec, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
+		data = torch.cat(frames_list, 0)
+		#data = data.view([30, 30, 30]).detach().cpu()
+		data = data.detach().cpu()
 
-		data = sample_rec.view([30, 30, 30]).cpu().detach()
+		save_gif(data, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
+
+		#data = sample_rec.view([30, 30, 30]).cpu().detach()
+		#data = data.detach().cpu().transpose(1, -1)
 
 		for ax, img in zip(axes[i, :].flatten(), data):
+
+			img = img.transpose(0, -1)
+
 			ax.axis('off')
 			ax.set_adjustable('box-forced')
 
-			ax.imshow(img, cmap="gray", aspect='equal')
+			ax.imshow(img, aspect='equal')
 		
 		plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -57,14 +64,12 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 def save_gif(data, file_name, enhance, delay):
 
-	data = data.view([30, 30, 30]).detach().cpu()
-
 	to_pil = transforms.ToPILImage()
 
 	if enhance:
-		frames = [ImageEnhance.Sharpness( to_pil(frame.unsqueeze(0)) ).enhance(10.0) for frame in data]
+		frames = [ImageEnhance.Sharpness( to_pil(frame) ).enhance(10.0) for frame in data]
 	else:
-		frames = [to_pil(frame.unsqueeze(0)) for frame in data]
+		frames = [to_pil(frame) for frame in data]
 
 	frames[0].save(file_name, save_all=True, append_images=frames[1:])
 
