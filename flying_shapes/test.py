@@ -12,6 +12,11 @@ from PIL import Image, ImageEnhance
 
 import torchvision.transforms as transforms
 
+def denorm(unorm):
+	norm = (unorm + 1) / 2
+
+	return norm.clamp(0, 1)
+
 def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	f_generator.eval()
@@ -35,7 +40,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 		for j in range(out.size(1)):
 			gen_frame = f_generator(out[:,j,:].contiguous())
-			frames_list.append(gen_frame.detach())
+			frames_list.append(denorm(gen_frame.detach()))
 
 		data = torch.cat(frames_list, 0)
 		#data = data.view([30, 30, 30]).detach().cpu()
