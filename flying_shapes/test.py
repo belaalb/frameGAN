@@ -72,7 +72,7 @@ def save_gif(data, file_name, enhance, delay):
 	to_pil = transforms.ToPILImage()
 
 	if enhance:
-		frames = [ImageEnhance.Sharpness( to_pil(frame) ).enhance(10.0) for frame in data]
+		frames = [ImageEnhance.Sharpness( to_pil(frame) ).enhance(1.0) for frame in data]
 	else:
 		frames = [to_pil(frame) for frame in data]
 
