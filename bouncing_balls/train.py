@@ -25,6 +25,7 @@ parser.add_argument('--save-every', type=int, default=5, metavar='N', help='how 
 parser.add_argument('--n-workers', type=int, default=4)
 parser.add_argument('--gen-arch', choices=['linear', 'conv'], default='linear', help='Linear or convolutional generator')
 parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
+parser.add_argument('--optimizer', choices=['adam', 'amsgrad', 'rmsprop'], default='adam', help='Select optimizer (Default is adam).')
 parser.add_argument('--average-mode', action='store_true', default=False, help='Disables hypervolume maximization and uses average loss instead')
 args = parser.parse_args()
 args.cuda = True if not args.no_cuda and torch.cuda.is_available() else False
@@ -48,7 +49,12 @@ frames_generator.load_state_dict(gen_state['model_state'])
 
 disc_list = []
 for i in range(args.ndiscriminators):
-	disc = models_zoo.Discriminator(optim.Adam, args.lr, (args.beta1, args.beta2)).train()
+	if args.optimizer == 'adam':
+		disc = models_zoo.Discriminator(optim.Adam, args.optimizer, args.lr, (args.beta1, args.beta2)).train()
+	elif args.optimizer == 'amsgrad':	
+		disc = models_zoo.Discriminator(optim.Adam, args.optimizer, args.lr, (args.beta1, args.beta2), amsgrad = True).train()
+	elif args.optimizer == 'rmsprop':
+		disc = models_zoo.Discriminator(optim.RMSprop, args.optimizer, args.lr, (args.beta1, args.beta2)).train()
 	disc_list.append(disc)
 
 if args.cuda:
@@ -58,7 +64,12 @@ if args.cuda:
 		disc = disc.cuda()
 	torch.backends.cudnn.benchmark=True
 
-optimizer_g = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, args.beta2))
+if args.optimizer == 'adam':
+	optimizer_g = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, args.beta2))
+elif args.optimizer == 'amsgrad':
+	optimizer_g = optim.Adam(generator.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), amsgrad = True)
+elif args.optimizer == 'rmsprop':
+	optimizer_g = optim.RMSprop(generator.parameters(), lr=args.lr)
 
 trainer = TrainLoop(generator, frames_generator, disc_list, optimizer_g, train_loader, nadir_slack=args.nadir_slack, checkpoint_path=args.checkpoint_path, checkpoint_epoch=args.checkpoint_epoch, hyper=not args.average_mode, cuda=args.cuda)
 

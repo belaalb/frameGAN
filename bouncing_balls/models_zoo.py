@@ -169,7 +169,7 @@ class frames_generator(torch.nn.Module):
 		return out
 
 class Discriminator(torch.nn.Module):
-	def __init__(self, optimizer, lr, betas, batch_norm=False):
+	def __init__(self, optimizer, optimizer_name, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
 		self.projection = nn.utils.weight_norm(nn.Conv3d(1, 1, kernel_size=(1, 8, 8), stride=(1, 3, 3), padding=(0, 2, 2), bias=False), name="weight")
@@ -215,7 +215,12 @@ class Discriminator(torch.nn.Module):
 		# Activation
 		self.output_layer.add_module('act', nn.Sigmoid())
 
-		self.optimizer = optimizer(list(self.hidden_layer.parameters()) + list(self.output_layer.parameters()), lr=lr, betas=betas)
+		if optimizer_name == 'adam':
+			self.optimizer = optimizer(list(self.hidden_layer.parameters()) + list(self.output_layer.parameters()), lr=lr, betas=betas)
+		elif optimizer_name == 'amsgrad':
+			self.optimizer = optimizer(list(self.hidden_layer.parameters()) + list(self.output_layer.parameters()), lr=lr, betas=betas, amsgrad = True)
+		elif optimizer_name == 'rmsprop':
+			self.optimizer = optimizer(list(self.hidden_layer.parameters()) + list(self.output_layer.parameters()), lr=lr)
 
 	def forward(self, x):
 		p_x = self.projection(x)
