@@ -1,7 +1,7 @@
 from __future__ import print_function
 import argparse
 import torch
-import models_zoo
+import models_zoo_smaller as models_zoo
 from data_load import Loader
 import subprocess
 

@@ -62,7 +62,6 @@ class Generator(torch.nn.Module):
 		self.output_layer.add_module('act', torch.nn.Tanh())
 
 	def forward(self, x):
-
 		x = x.view(x.size(0), -1)
 		x = self.linear(x)
 

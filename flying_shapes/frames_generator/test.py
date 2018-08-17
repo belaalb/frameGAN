@@ -47,10 +47,13 @@ def test_model(model, n_tests, cuda_mode, enhance=True):
 		if len(sample.size())<3:
 			sample = sample.view(1, 28, 28)
 
+		sample = denorm(sample).cpu()
+		sample = (((sample - sample.min()) * 255) / (sample.max() - sample.min())).numpy().transpose(1, 2, 0).astype(np.uint8).squeeze()
+
 		if enhance:
-			sample = ImageEnhance.Sharpness( to_pil(sample.cpu()) ).enhance(1.2)
+			sample = ImageEnhance.Sharpness( to_pil(sample) ).enhance(1.0)
 		else:
-			sample = to_pil(sample.cpu())
+			sample = to_pil(sample)
 
 		sample.save('sample_{}.pdf'.format(i + 1))
 
