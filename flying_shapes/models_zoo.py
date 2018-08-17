@@ -60,16 +60,17 @@ class Generator_linear(nn.Module):
 		## Considering (30, 90) inputs
 
 		self.features = nn.Sequential(	 		
-					nn.Linear(100, 512, bias = False),
-					nn.BatchNorm1d(512),	
-					nn.ReLU(),	
-					nn.Linear(512, 1024, bias = False),	
-		 			nn.BatchNorm1d(1024),
-		 			nn.ReLU(),	 		
-					nn.Linear(1024, 2048, bias = False),	
-					nn.BatchNorm1d(2048),	
-					nn.ReLU(),
-					nn.Linear(2048, 3840, bias = False),	
+					#nn.Linear(100, 512, bias = False),
+					#nn.BatchNorm1d(512),	
+					#nn.ReLU(),	
+					#nn.Linear(512, 1024, bias = False),	
+		 			#nn.BatchNorm1d(1024),
+		 			#nn.ReLU(),	 		
+					#nn.Linear(1024, 2048, bias = False),	
+					#nn.BatchNorm1d(2048),	
+					#nn.ReLU(),
+					#nn.Linear(2048, 3840, bias = False),
+					nn.Linear(100, 3840, bias = False),	
 					nn.BatchNorm1d(3840),
 		 			nn.ReLU() )
 
@@ -80,7 +81,7 @@ class Generator_linear(nn.Module):
 	def forward(self, x):
 		x = self.features(x.squeeze(2))
 
-		x = x.view(30, x.size(0), -1)
+		x = x.view(15, x.size(0), -1)
 
 		batch_size = x.size(1)
 		seq_size = x.size(0)
@@ -171,18 +172,19 @@ class Discriminator(torch.nn.Module):
 	def __init__(self, optimizer, optimizer_name, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
-		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 1, kernel_size=(1, 8, 8), stride=(1, 3, 3), padding=(0, 2, 2), bias=False), name="weight")
+		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 3, kernel_size=(1, 8, 8), stride=(1, 3, 3), padding=(0, 2, 2), bias=False), name="weight")
 		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
 		self.hidden_layer = torch.nn.Sequential()
 		#num_filters = [256, 512, 1024]
-		num_filters = [256, 512, 768]
+		#num_filters = [256, 512, 768]
+		num_filters = [128, 256, 512]
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
-				conv = nn.Conv3d(1, num_filters[i], kernel_size=4, stride=(2,2,2), padding=(1,1,1))
-			elif i ==1:
+				conv = nn.Conv3d(3, num_filters[i], kernel_size=4, stride=(2,2,2), padding=(1,1,1))
+			elif i == 1:
 				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(2,1,1), padding=(1,1,1))
 			else:
 				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(1,1,1), padding=(0,1,1))
