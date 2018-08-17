@@ -70,8 +70,8 @@ class Generator_linear(nn.Module):
 					#nn.BatchNorm1d(2048),	
 					#nn.ReLU(),
 					#nn.Linear(2048, 3840, bias = False),
-					nn.Linear(100, 3840, bias = False),	
-					nn.BatchNorm1d(3840),
+					nn.Linear(100, 1920, bias = False),	
+					#nn.BatchNorm1d(1920),
 		 			nn.ReLU() )
 
 		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
@@ -183,11 +183,11 @@ class Discriminator(torch.nn.Module):
 		for i in range(len(num_filters)):
 			# Convolutional layer
 			if i == 0:
-				conv = nn.Conv3d(3, num_filters[i], kernel_size=4, stride=(2,2,2), padding=(1,1,1))
+				conv = nn.Conv3d(3, num_filters[i], kernel_size=4, stride=(1,2,2), padding=(1,1,1))
 			elif i == 1:
 				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(2,1,1), padding=(1,1,1))
 			else:
-				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(1,1,1), padding=(0,1,1))
+				conv = nn.Conv3d(num_filters[i-1], num_filters[i], kernel_size=4, stride=(2,1,1), padding=(1,1,1))
 
 			conv_name = 'conv' + str(i + 1)
 			self.hidden_layer.add_module(conv_name, conv)
@@ -208,7 +208,7 @@ class Discriminator(torch.nn.Module):
 		# Output layer
 		self.output_layer = torch.nn.Sequential()
 		# Convolutional layer
-		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=(1,1,1), padding=(0,1,1))
+		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=(2,1,1), padding=(1,1,1))
 		self.output_layer.add_module('out', out)
 		# Initializer
 		nn.init.normal_(out.weight, mean=0.0, std=0.02)
