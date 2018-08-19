@@ -115,6 +115,8 @@ if __name__ == '__main__':
 	parser.add_argument('--delay', type=int, default=20, metavar='N', help='Delay between frames  (default: 20)')
 	parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
 	parser.add_argument('--no-plots', action='store_true', default=False, help='Disables plot of train/test losses')
+	parser.add_argument('--plot-real', action='store_true', default=False, help='Disables plot of real data')
+	parser.add_argument('--realdata-path', type=str, default=None, metavar='Path', help='Dataset path')
 	parser.add_argument('--enhance', action='store_true', default=True, help='Enables enhancement')
 	parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 	args = parser.parse_args()
@@ -143,6 +145,9 @@ if __name__ == '__main__':
 	if args.cuda:
 		generator = generator.cuda()
 		frames_generator = frames_generator.cuda()
+
+	if args.plot_real:
+		plot_real(args.n_tests, args.realdata_path)
 
 	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 

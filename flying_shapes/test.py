@@ -1,7 +1,7 @@
 from __future__ import print_function
 import argparse
 import torch
-import models_zoo_smaller as models_zoo
+import models_zoo
 from data_load import Loader
 import subprocess
 
@@ -24,7 +24,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	to_pil = transforms.ToPILImage()
 
-	n_cols, n_rows = (n_tests, 30)
+	n_cols, n_rows = (n_tests, 15)
 	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
 
 	for i in range(n_tests):
@@ -43,13 +43,10 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 			frames_list.append(denorm(gen_frame.detach()))
 
 		data = torch.cat(frames_list, 0)
-		#data = data.view([30, 30, 30]).detach().cpu()
 		data = data.detach().cpu()
 
 		save_gif(data, str(i+1)+'_rec.gif', enhance=enhancement, delay = delay)
 
-		#data = sample_rec.view([30, 30, 30]).cpu().detach()
-		#data = data.detach().cpu().transpose(1, -1)
 
 		for ax, img in zip(axes[i, :].flatten(), data):
 

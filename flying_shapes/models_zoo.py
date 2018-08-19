@@ -71,7 +71,7 @@ class Generator_linear(nn.Module):
 					#nn.ReLU(),
 					#nn.Linear(2048, 3840, bias = False),
 					nn.Linear(100, 1920, bias = False),	
-					#nn.BatchNorm1d(1920),
+					nn.BatchNorm1d(1920),
 		 			nn.ReLU() )
 
 		self.lstm = nn.LSTM(128, 256, 2, bidirectional=True, batch_first=False)
