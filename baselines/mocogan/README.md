@@ -31,10 +31,8 @@ To run this code you need to install the packages below:
 
 ### PIL 5.2.0
 	
-	# Try both, but I think that the second is the correct one.
-	/home/$USER/anaconda2/envs/mocogan/bin/pip uninstall PIL
-	/home/$USER/anaconda2/envs/mocogan/bin/pip uninstall Pillow
-	# if you have problems with Pillow, uninstansll and install again.
+	/home/$USER/anaconda2/envs/mocogan/bin/pip install Pillow
+	# if you have problems with Pillow, uninstall and install it again.
 
 ### Tensorflow-gpu 1.4
 
