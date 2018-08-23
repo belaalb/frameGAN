@@ -55,6 +55,47 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	plt.close()
 
+def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
+
+	f_generator.eval()
+	generator.eval()
+
+	to_pil = transforms.ToPILImage()
+
+	for i in range(n_tests):
+
+		z_ = torch.randn(1, 100).view(-1, 100, 1)
+
+		if args.cuda:
+			z_ = z_.cuda()
+
+		out = generator.forward(z_)
+
+		frames_list = []
+
+		for j in range(out.size(1)):
+			gen_frame = f_generator(out[:,j,:].squeeze(1).contiguous())
+			frames_list.append(gen_frame.squeeze().unsqueeze(2))
+
+		sample_rec = torch.cat(frames_list, 0)
+		data = sample_rec.view([30, 30, 30]).cpu().detach()
+
+		n_cols, n_rows = (1, 30)
+		fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
+
+		for ax, img in zip(axes.flatten(), data):
+			ax.axis('off')
+			ax.set_adjustable('box-forced')
+
+			ax.imshow(img, cmap="gray", aspect='equal')
+		
+		plt.subplots_adjust(wspace=0, hspace=0)
+
+		save_fn = 'video'+ str(i) +'.pdf'
+		plt.savefig(save_fn)
+
+		plt.close()
+
 def save_gif(data, file_name, enhance, delay):
 
 	data = data.view([30, 30, 30]).detach().cpu()
@@ -81,7 +122,7 @@ def plot_real(n_tests, data_path):
 
 		img_idx = np.random.randint(len(real_loader))
 		real_sample = real_loader[img_idx].squeeze()
-
+	
 		for ax, img in zip(axes[i, :].flatten(), real_sample):
 			ax.axis('off')
 			ax.set_adjustable('box-forced')
@@ -149,7 +190,8 @@ if __name__ == '__main__':
 	if args.plot_real:
 		plot_real(args.n_tests, args.realdata_path)
 
-	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
+	save_separate(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
+	#test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
 	if not args.no_plots:
 		plot_learningcurves(history, list(history.keys()))
