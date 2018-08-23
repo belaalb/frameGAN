@@ -81,19 +81,24 @@ def plot_real(n_tests, data_path):
 
 	real_loader = Loader(hdf5_name = data_path)
 
-	n_cols, n_rows = (n_tests, 30)
+	n_cols, n_rows = (n_tests, 15)
 	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
 
 	for i in range(n_tests):
 
 		img_idx = np.random.randint(len(real_loader))
 		real_sample = real_loader[img_idx].squeeze()
+		real_sample = real_sample.transpose(0, 1)
+
+		print(real_sample.size())
 
 		for ax, img in zip(axes[i, :].flatten(), real_sample):
+			img = denorm(img.transpose(0, -1))
+
 			ax.axis('off')
 			ax.set_adjustable('box-forced')
 
-			ax.imshow(img, cmap="gray", aspect='equal')
+			ax.imshow(img, aspect='equal')
 		
 		plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -122,6 +127,8 @@ if __name__ == '__main__':
 	parser.add_argument('--delay', type=int, default=20, metavar='N', help='Delay between frames  (default: 20)')
 	parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables GPU use')
 	parser.add_argument('--no-plots', action='store_true', default=False, help='Disables plot of train/test losses')
+	parser.add_argument('--plot-real', action='store_true', default=False, help='Disables plot of real data')
+	parser.add_argument('--realdata-path', type=str, default=None, metavar='Path', help='Dataset path')
 	parser.add_argument('--enhance', action='store_true', default=True, help='Enables enhancement')
 	parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 	args = parser.parse_args()
@@ -130,7 +137,7 @@ if __name__ == '__main__':
 	torch.manual_seed(args.seed)
 	if args.cuda:
 		torch.cuda.manual_seed(args.seed)
-
+	
 	if args.gen_arch == 'conv':
 		generator = models_zoo.Generator_conv(args.cuda)
 	elif args.gen_arch == 'linear':
@@ -150,6 +157,9 @@ if __name__ == '__main__':
 	if args.cuda:
 		generator = generator.cuda()
 		frames_generator = frames_generator.cuda()
+	
+	if args.plot_real:
+		plot_real(args.n_tests, args.realdata_path)
 
 	test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
