@@ -92,7 +92,7 @@ class TrainLoop(object):
 		frames_list = []
 
 		for i in range(out.size(1)):
-			gen_frame = self.f_generator(out[:,i,:].squeeze().contiguous())
+			gen_frame = self.f_generator(out[:,i,:].unsqueeze(-1).unsqueeze(-1).contiguous())
 			frames_list.append(gen_frame.unsqueeze(2))
 
 		out = torch.cat(frames_list, 2)

@@ -93,9 +93,8 @@ class Generator_linear(nn.Module):
 			h0 = h0.cuda()
 			c0 = c0.cuda()
 
-		
 		x, h_c = self.lstm(x, (h0, c0))
-		
+
 		x = torch.tanh( self.fc( x.view(batch_size*seq_size, -1) ) )
 
 		return x.view(batch_size, seq_size, -1)
@@ -153,7 +152,7 @@ class Discriminator(torch.nn.Module):
 	def __init__(self, optimizer, optimizer_name, lr, betas, batch_norm=False):
 		super(Discriminator, self).__init__()
 
-		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 1, kernel_size=(8, 8, 8), stride=(2, 2, 2), padding=(2, 2, 2), bias=False), name="weight")
+		self.projection = nn.utils.weight_norm(nn.Conv3d(3, 1, kernel_size=(8, 8, 8), stride=(2, 2, 2), padding=(1, 1, 1), bias=False), name="weight")
 		nn.init.constant_(self.projection.weight_g, 1)
 
 		# Hidden layers
@@ -187,7 +186,7 @@ class Discriminator(torch.nn.Module):
 		# Output layer
 		self.output_layer = torch.nn.Sequential()
 		# Convolutional layer
-		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=(2,1,1), padding=(1,1,1))
+		out = nn.Conv3d(num_filters[i], 1, kernel_size=4, stride=(2,2,2), padding=(1,1,1))
 		self.output_layer.add_module('out', out)
 		# Initializer
 		nn.init.normal_(out.weight, mean=0.0, std=0.02)
