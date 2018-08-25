@@ -91,7 +91,7 @@ def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay
 		
 		plt.subplots_adjust(wspace=0, hspace=0)
 
-		save_fn = 'video'+ str(i) +'.pdf'
+		save_fn = 'video'+ str(i) +'.png'
 		plt.savefig(save_fn)
 
 		plt.close()

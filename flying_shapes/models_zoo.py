@@ -102,10 +102,10 @@ class Generator_linear(nn.Module):
 
 class frames_generator(torch.nn.Module):
 	def __init__(self):
-		super(frames_generator, self).__init__()
+		super(Generator, self).__init__()
 
-		num_filters = [1024, 512, 256]
-		input_dim = 3
+		num_filters = [1024, 512, 256, 128]
+		input_dim = 100
 		output_dim = 3
 
 		# Hidden layers
@@ -121,8 +121,8 @@ class frames_generator(torch.nn.Module):
 			self.hidden_layer.add_module(deconv_name, deconv)
 
 			# Initializer
-			nn.init.normal(deconv.weight, mean=0.0, std=0.02)
-			nn.init.constant(deconv.bias, 0.0)
+			nn.init.normal_(deconv.weight, mean=0.0, std=0.02)
+			nn.init.constant_(deconv.bias, 0.0)
 
 			# Batch normalization
 			bn_name = 'bn' + str(i + 1)
@@ -138,12 +138,13 @@ class frames_generator(torch.nn.Module):
 		out = torch.nn.ConvTranspose2d(num_filters[i], output_dim, kernel_size=4, stride=2, padding=1)
 		self.output_layer.add_module('out', out)
 		# Initializer
-		nn.init.normal(out.weight, mean=0.0, std=0.02)
-		nn.init.constant(out.bias, 0.0)
+		nn.init.normal_(out.weight, mean=0.0, std=0.02)
+		nn.init.constant_(out.bias, 0.0)
 		# Activation
 		self.output_layer.add_module('act', torch.nn.Tanh())
 
 	def forward(self, x):
+
 		h = self.hidden_layer(x)
 		out = self.output_layer(h)
 		return out
