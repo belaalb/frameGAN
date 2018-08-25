@@ -26,9 +26,10 @@ class Loader(Dataset):
 		scene_3 = np.moveaxis(scene_2, -1, 1)
 		scene_4 = torch.from_numpy(scene_3).float()
 
-		idx = np.random.randint(scene_4.size(1)-15)
-		img = scene_4[:, idx:(idx+15), :, :]
+		#idx = np.random.randint(scene_4.size(1))
+		#img = scene_4[:, idx:(idx+15), :, :]
 		#img = img[:,0::3,:, :]
+		img = scene_4
 		img = (img - 0.5) / 0.5
 
 		return img
