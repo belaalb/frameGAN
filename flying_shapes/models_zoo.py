@@ -102,7 +102,7 @@ class Generator_linear(nn.Module):
 
 class frames_generator(torch.nn.Module):
 	def __init__(self):
-		super(Generator, self).__init__()
+		super(frames_generator, self).__init__()
 
 		num_filters = [1024, 512, 256, 128]
 		input_dim = 100
