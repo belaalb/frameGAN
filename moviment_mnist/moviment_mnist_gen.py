@@ -2,7 +2,6 @@ from __future__ import print_function
 import os
 import numpy as np
 from tqdm import trange
-import cv2
 import glob
 
 
@@ -42,6 +41,7 @@ def data_gen(n_samples=10000,im_size=64, n_frames=20,debug=False,debug_opencv=Fa
 	return mov_mnist
 
 def visualize_moviment_mnist(mov_mnist):
+	import cv2
 	for i in range(0,len(mov_mnist)):
 		for k in range(0, mov_mnist.shape[2]):
 			cv2.imshow("Teste", mov_mnist[i][0][k][:][:])
