@@ -69,6 +69,15 @@ if __name__ == '__main__':
 
 	dat = data_gen(n_samples=args.n_samples, im_size=args.im_size, n_frames=args.n_frames,debug=args.debug,debug_opencv=args.opencv)
 
+	#print(dat.max((0,1,2,3)) , dat.min((0,1,2,3)))
+
+	##dat = ( dat - dat.mean((0,1,2,3)) ) / (dat.std((0,1,2,3)) + 1e-7)
+	print(dat.min())
+	dat = 2*(( dat - dat.min() ) / (dat.max() - dat.min() + 1e-17)) - 1 
+
+	#print(dat.mean((0,1,2,3)) , dat.std((0,1,2,3)))
+	print(dat.max() , dat.min())
+
 	### DEBUG ##
 	if(args.debug):
 		print(dat.shape)

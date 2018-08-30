@@ -41,14 +41,13 @@ def test_model(model, n_tests, cuda_mode, enhance=True):
 	out = model.forward(z_)
 
 	for i in range(out.size(0)):
-		#sample = denorm(out[i].data)
 		sample = out[i].detach()
 
 		if len(sample.size())<3:
-			sample = sample.view(1, 28, 28)
+			sample = sample.view(1, 64, 64)
 
-		sample = denorm(sample).cpu()
-		sample = (((sample - sample.min()) * 255) / (sample.max() - sample.min())).numpy().transpose(1, 2, 0).astype(np.uint8).squeeze()
+		sample = sample.cpu()
+		sample = (((sample - sample.min()) * 255) / (sample.max() - sample.min())).numpy().transpose(1, 2, 0).astype(np.uint8)#.squeeze()
 
 		if enhance:
 			sample = ImageEnhance.Sharpness( to_pil(sample) ).enhance(1.0)
@@ -71,11 +70,11 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 		noise = noise.cuda()
 
 	gen_image = generator(noise).view(-1, nc, im_size, im_size)
-	gen_image = denorm(gen_image)
 	gen_image = gen_image
 
 	#n_rows = np.sqrt(noise.size()[0]).astype(np.int32)
 	#n_cols = np.sqrt(noise.size()[0]).astype(np.int32)
+
 	n_cols, n_rows = fig_size
 	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
 	for ax, img in zip(axes.flatten(), gen_image):
@@ -83,13 +82,14 @@ def save_samples(generator: torch.nn.Module, cp_name: str, cuda_mode: bool, pref
 		ax.set_adjustable('box-forced')
 
 		img = img.cpu().detach()
+		img = (((img - img.min()) * 255) / (img.max() - img.min()))#.transpose(1, 2, 0).astype(np.uint8)#.squeeze()
 
 		if enhance:
 			img_E = ImageEnhance.Sharpness( to_pil(img) ).enhance(1.)
 			img = to_tensor(img_E)
 
 		# Scale to 0-255
-		img = (((img - img.min()) * 255) / (img.max() - img.min())).numpy().transpose(1, 2, 0).astype(np.uint8).squeeze()
+		img = (((img + img.min()) * 255) / (img.max() - img.min())).numpy().transpose(1, 2, 0).astype(np.uint8).squeeze()
 		# ax.imshow(img.cpu().data.view(image_size, image_size, 3).numpy(), cmap=None, aspect='equal')
 
 		if nc == 1:
@@ -138,6 +138,6 @@ if __name__ == '__main__':
 
 	if not args.no_plots:
 		plot_learningcurves(history, list(history.keys()))
-
+	save_samples(generator=model, cp_name=args.cp_path.split('/')[-1].split('.')[0], prefix='mnist', fig_size=(9, 9), nc=1, im_size=64, cuda_mode=args.cuda, enhance=False)
 	test_model(model=model, n_tests=args.n_tests, cuda_mode=args.cuda, enhance=False)
-	save_samples(generator=model, cp_name=args.cp_path.split('/')[-1].split('.')[0], prefix='mnist', fig_size=(9, 9), nc=3, im_size=64, cuda_mode=args.cuda, enhance=False)
+
