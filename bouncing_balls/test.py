@@ -62,6 +62,8 @@ def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay
 
 	to_pil = transforms.ToPILImage()
 
+	intra_mse = []
+
 	for i in range(n_tests):
 
 		z_ = torch.randn(1, 100).view(-1, 100, 1)
@@ -76,6 +78,15 @@ def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay
 		for j in range(out.size(1)):
 			gen_frame = f_generator(out[:,j,:].squeeze(1).contiguous())
 			frames_list.append(gen_frame.squeeze().unsqueeze(2))
+
+		mse = 0.0
+
+		for j in range(1, out.size(1)):
+			mse += torch.nn.functional.mse_loss(frames_list[i], frames_list[i-1]).item()
+
+		mse /= (j+1)
+
+		intra_mse.append(mse)
 
 		sample_rec = torch.cat(frames_list, 0)
 		data = sample_rec.view([30, 30, 30]).cpu().detach()
@@ -95,6 +106,8 @@ def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay
 		plt.savefig(save_fn)
 
 		plt.close()
+
+	return intra_mse
 
 def save_gif(data, file_name, enhance, delay):
 
@@ -118,6 +131,8 @@ def plot_real(n_tests, data_path):
 	n_cols, n_rows = (n_tests, 30)
 	fig, axes = plt.subplots(n_cols, n_rows, figsize=(n_rows, n_cols))
 
+	intra_mse = []
+
 	for i in range(n_tests):
 
 		img_idx = np.random.randint(len(real_loader))
@@ -131,10 +146,21 @@ def plot_real(n_tests, data_path):
 		
 		plt.subplots_adjust(wspace=0, hspace=0)
 
+		mse = 0.0
+
+		for j in range(1, real_sample.size(0)):
+			mse += torch.nn.functional.mse_loss(real_sample[i,:,:], real_sample[i-1,:,:]).item()
+
+		mse /= (j+1)
+
+		intra_mse.append(mse)
+
 	save_fn = 'real.pdf'
 	plt.savefig(save_fn)
 
 	plt.close()
+
+	return intra_mse
 
 def plot_learningcurves(history, keys):
 
@@ -188,9 +214,9 @@ if __name__ == '__main__':
 		frames_generator = frames_generator.cuda()
 
 	if args.plot_real:
-		plot_real(args.n_tests, args.realdata_path)
+		real_mse = plot_real(args.n_tests, args.realdata_path)
 
-	save_separate(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
+	fake_mse = save_separate(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 	#test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
 
 	if not args.no_plots:
