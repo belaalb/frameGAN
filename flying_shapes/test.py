@@ -39,7 +39,7 @@ def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 		frames_list = []
 
 		for j in range(out.size(1)):
-			gen_frame = f_generator(out[:,j,:].contiguous())
+			gen_frame = f_generator(out[:,j,:].unsqueeze(-1).unsqueeze(-1).contiguous())
 			frames_list.append(denorm(gen_frame.detach()))
 
 		data = torch.cat(frames_list, 0)

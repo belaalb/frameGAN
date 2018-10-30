@@ -12,6 +12,63 @@ from PIL import Image, ImageEnhance
 
 import torchvision.transforms as transforms
 
+
+from sklearn.metrics import mean_squared_error
+
+
+def test_lin_interp(f_generator, n_tests, cuda_mode):
+
+	intra_mse = []
+
+	for test in range(n_tests):
+
+		z12 = np.random.randn(30, 100)
+
+		#z12_ = np.random.randn(2, 100)
+	
+		#alpha_list = list(np.arange(1, 31)/30)
+
+		#z_interp = []
+		#for alpha in alpha_list:
+		#	z_interp.append((1-alpha)*z12[0] + alpha*z12[-1])
+
+		#z_interp = torch.Tensor(np.asarray(z_interp))
+		z_interp = torch.Tensor(np.asarray(z12))
+
+		f_generator.eval()
+		generator.eval()
+
+		to_pil = transforms.ToPILImage()
+
+		if args.cuda:
+			z_interp = z_interp.cuda()
+
+		frames_list = []
+
+		for j in range(z_interp.size(0)):
+			gen_frame = f_generator(z_interp[j,:].unsqueeze(0).contiguous())
+			frames_list.append(gen_frame.squeeze().unsqueeze(2))
+		mse_sk = 0.0
+		#mse_sk = []
+		count = 0
+		for j in range(1, z_interp.size(0)):
+			if j%1==0:
+				a = frames_list[j].detach().cpu().numpy().squeeze()
+				a[a > 0] = 1.
+				a[a < 0] = 0.
+				b = frames_list[j-1].detach().cpu().numpy().squeeze()
+				b[b > 0] = 1.
+				b[b < 0] = 0.
+				count += 1
+				mse_sk += mean_squared_error(a, b)
+		
+		mse_sk /= count
+
+		intra_mse.append(np.asarray(mse_sk))
+
+	return intra_mse
+
+
 def test_model(generator, f_generator, n_tests, cuda_mode, enhancement, delay):
 
 	f_generator.eval()
@@ -79,14 +136,27 @@ def save_separate(generator, f_generator, n_tests, cuda_mode, enhancement, delay
 			gen_frame = f_generator(out[:,j,:].squeeze(1).contiguous())
 			frames_list.append(gen_frame.squeeze().unsqueeze(2))
 
-		mse = 0.0
-
+		mse_sk = 0.0
+		#mse_sk = []
+		count = 0
 		for j in range(1, out.size(1)):
-			mse += torch.nn.functional.mse_loss(frames_list[i], frames_list[i-1]).item()
+			if j%1==0:
+				a = frames_list[j].detach().cpu().numpy().squeeze()
+				a[a > 0] = 1.
+				a[a < 0] = 0.
+				b = frames_list[j-1].detach().cpu().numpy().squeeze()
+				b[b > 0] = 1.
+				b[b < 0] = 0.
+				count += 1
+				mse_sk += mean_squared_error(a, b)
+			
+			#mse += torch.nn.functional.mse_loss(frames_list[j], frames_list[j-1]).item()
 
-		mse /= (j+1)
+		#mse /= (j+1)
 
-		intra_mse.append(mse)
+		mse_sk /= count
+
+		intra_mse.append(np.asarray(mse_sk))
 
 		sample_rec = torch.cat(frames_list, 0)
 		data = sample_rec.view([30, 30, 30]).cpu().detach()
@@ -147,13 +217,23 @@ def plot_real(n_tests, data_path):
 		plt.subplots_adjust(wspace=0, hspace=0)
 
 		mse = 0.0
-
+		#mse = []		
+		count = 0
 		for j in range(1, real_sample.size(0)):
-			mse += torch.nn.functional.mse_loss(real_sample[i,:,:], real_sample[i-1,:,:]).item()
+			if j%1==0:
+				a = real_sample[j].numpy().squeeze()
+				a[a > 0] = 1.
+				a[a < 0] = 0.
+				b = real_sample[j-1].numpy().squeeze()
+				b[b > 0] = 1.
+				b[b < 0] = 0.
+				count += 1
+				mse += mean_squared_error(a, b)
+				#mse+=torch.nn.functional.mse_loss(real_sample[j,:,:], real_sample[j-1,:,:]).item()
 
-		mse /= (j+1)
+		mse /= count
 
-		intra_mse.append(mse)
+		intra_mse.append(np.asarray(mse))
 
 	save_fn = 'real.pdf'
 	plt.savefig(save_fn)
@@ -215,9 +295,28 @@ if __name__ == '__main__':
 
 	if args.plot_real:
 		real_mse = plot_real(args.n_tests, args.realdata_path)
+		print(np.mean(real_mse), np.std(real_mse))
+		#real_mse = np.asarray(real_mse)
 
 	fake_mse = save_separate(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
+	print(np.mean(fake_mse), np.std(fake_mse))
 	#test_model(generator=generator, f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda, enhancement=args.enhance, delay=args.delay)
+
+	lin_interp_mse = test_lin_interp(f_generator=frames_generator, n_tests=args.n_tests, cuda_mode=args.cuda)
+	print(np.mean(lin_interp_mse), np.std(lin_interp_mse))
 
 	if not args.no_plots:
 		plot_learningcurves(history, list(history.keys()))
+
+	plt.hist(real_mse)
+	plt.hist(fake_mse)
+	plt.hist(lin_interp_mse)
+	plt.savefig('histogram.png')
+	plt.show()
+	plt.close()
+
+	plt.boxplot([real_mse, fake_mse, lin_interp_mse])
+	plt.savefig('boxplot.png')
+	plt.show()
+
+
